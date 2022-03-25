@@ -68,8 +68,6 @@ module.exports = {
         try {
             let user = await User.findOne({email});
 
-            console.log(user.email, process.env)
-
             if (user && ( await bcrypt.compare(password, user.password))) {
                 const token = jwt.sign(
                     { user_id : user._id, email},

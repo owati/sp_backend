@@ -6,12 +6,8 @@ const skuSchema = mongoose.Schema({
         required : true
     },
     price : {
-        amount : {
-            type : Number
-        },
-        currency : {
-            type : String
-        }
+        type : Number,
+        required : true
     },
 
     quantity : {

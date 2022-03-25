@@ -1,9 +1,11 @@
-require('dotenv').config()
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
-const user_route = require("./routes/user")
+const user_route = require("./routes/user");
+const sku_route = require('./routes/sku');
+
 
 mongoose.connect('mongodb://localhost:27017/test')
 const db_conn = mongoose.connection
@@ -23,6 +25,7 @@ app.use((req, res, next) => {
 
 //routes
 app.use('/account', user_route);
+app.use('/sku', sku_route);
 
 
 app.listen("3000")
