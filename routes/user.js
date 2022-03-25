@@ -70,7 +70,7 @@ router.route('/info')
     .get(auth, async (req, res) => {
         try {
             if (req.user) {
-                const user = await User.findById(req.user?.user_id)
+                const user = await User.findById(req.user?.user_id).select('-password')
                 if (user) {
                     res.status(200)
                         .send(
@@ -106,7 +106,7 @@ router.route('/info')
         const body = req.body
         try {
             if (req.user) {
-                const user = await User.findById(req.user?.user_id)
+                const user = await User.findById(req.user?.user_id).select('-password')
                 if (user) {
                     for (let field in body) {
                         if (!["is_admin", "last_login", "date_created"].includes(field)) {

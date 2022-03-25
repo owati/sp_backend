@@ -36,7 +36,8 @@ const userSchema = mongoose.Schema(
         },
 
         date_created : {
-            type : Date
+            type : Date,
+            immutable : true
         },
 
         last_login : {
@@ -45,8 +46,10 @@ const userSchema = mongoose.Schema(
 
         is_admin : {
             type : Boolean,
-            default : false
+            default : false,
+            immutable : true
         },
+
         token : String
     }
 )
