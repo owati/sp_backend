@@ -67,7 +67,7 @@ module.exports = {
     authenticate: async (email, password) => {
         try {
             let user = await User.findOne({email});
-
+            console.log(user)
             if (user && ( await bcrypt.compare(password, user.password))) {
                 const token = jwt.sign(
                     { user_id : user._id, email},
@@ -75,9 +75,9 @@ module.exports = {
                     {expiresIn : '5h'}
                 )
                 user.token = token
-                return [200, "login eas successful", user]
+                return [200, "login was successful", user]
             } else {
-                return [401,"the password is incorrect", null]
+                return [401, `the ${!user ? "email" :"password"}  is incorrect`, null]
             }
         } catch (e) {
             console.log(e)

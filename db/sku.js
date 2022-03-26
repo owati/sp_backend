@@ -31,6 +31,15 @@ const skuSchema = mongoose.Schema({
         required : true
     },
 
+    purchases : {
+        type : Number,
+        default : 0
+    },
+    discount : {
+        type : Number,
+        default : 0
+    },
+
     review : {
         type : Number,
         default : 0
