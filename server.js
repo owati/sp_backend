@@ -6,6 +6,7 @@ const cors = require('cors')
 
 const user_route = require("./routes/user");
 const sku_route = require('./routes/sku');
+const info_route = require('./routes/info');
 
 
 mongoose.connect('mongodb://localhost:27017/test')
@@ -31,6 +32,7 @@ app.use((req, res, next) => {
 //routes
 app.use('/account', user_route);
 app.use('/sku', sku_route);
+app.use('/info', info_route)
 
 
 app.listen("3001")
