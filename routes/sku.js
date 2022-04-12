@@ -138,38 +138,36 @@ router.route('/units/:id')
 
 router.get('/search', async (req, res) => {
     try {
-        const query = req.query;
+
+        const { q } = req.query;
         const qs = await Sku.find()
         const filtered = qs.filter(
             ({ name, category }) => {
-                let check = true;
-                for (let i in query) {
-                    if (i === "name") {
-                        if (!name.includes(query[i])) {
-                            check = false
-                            break;
-                        }
-                    } else {
-                        if (!category[i].includes(query[i])) {
-                            check = false;
-                            break
+                if (name.includes(q)) {
+                    return true;
+                }
+                else {
+                    for(let i in category) {
+                        if (category[i].includes(q)){
+                            return true;
                         }
                     }
+                    return false;
                 }
-                return check;
+
             }
         )
 
         if (filtered.length > 0) {
             res.status(200)
                 .send({
-                    message : "filter results compiled",
-                    data : filtered
+                    message: "filter results compiled",
+                    data: filtered
                 })
         } else {
             res.status(404)
                 .send({
-                    message : "the filter didn't match"
+                    message: "the filter didn't match"
                 })
         }
 
