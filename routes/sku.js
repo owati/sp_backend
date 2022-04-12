@@ -18,16 +18,16 @@ router.route('/units')
                 qs = await Sku.find();
             }
             res.status(200)
-            .send({
-                message : "fetch successful",
-                data : qs
-            })
+                .send({
+                    message: "fetch successful",
+                    data: qs
+                })
 
         } catch (e) {
             res.status(400)
-               .send({
-                   message : e.message
-               })
+                .send({
+                    message: e.message
+                })
         }
     })
 
@@ -37,21 +37,21 @@ router.route('/units')
             if (body) {
                 await Sku.create(body)
                 res.status(201)
-                   .send({
-                       message : "new sku created"
-                   })
+                    .send({
+                        message: "new sku created"
+                    })
             } else {
                 res.status(400)
-                   .send({
-                       message : "no data was provided"
-                   })
+                    .send({
+                        message: "no data was provided"
+                    })
             }
 
         } catch (e) {
             res.status(400)
-               .send({
-                   message : e.message
-               })
+                .send({
+                    message: e.message
+                })
         }
     })
 
@@ -59,83 +59,128 @@ router.route('/units/:id')
     .get(async (req, res) => {
         try {
             const sku = await Sku.findById(req.params.id);
-            if(sku) {
+            if (sku) {
                 res.status(200)
-                   .send({
-                       message : "the sku entity was found",
-                       data : sku
-                   })
+                    .send({
+                        message: "the sku entity was found",
+                        data: sku
+                    })
             } else {
                 res.status(404)
-                   .send({
-                       message : "the sku entity was not found"
-                   })
+                    .send({
+                        message: "the sku entity was not found"
+                    })
             }
         } catch (e) {
             res.status(400)
-               .send({
-                   message : e.message
-               })
+                .send({
+                    message: e.message
+                })
         }
     })
     .put(auth, admin, async (req, res) => {
         try {
             const sku = await Sku.findById(req.params.id);
             const body = req.body
-            if(sku) {
-                for(let i in body) {
+            if (sku) {
+                for (let i in body) {
                     console.log(i)
-                    if(!(i === 'review')) {
+                    if (!(i === 'review')) {
                         sku[i] = body[i]
                     }
                 }
                 console.log("yeah")
                 await sku.save()
                 res.status(202)
-                   .send({
-                       message : "the update was successful"
-                   })
+                    .send({
+                        message: "the update was successful"
+                    })
             } else {
                 res.status(404)
-                .send({
-                    message : "the sku entity was not found"
-                })
+                    .send({
+                        message: "the sku entity was not found"
+                    })
             }
 
         } catch (e) {
             res.status(400)
-            .send({
-                message : e.message
-            })
+                .send({
+                    message: e.message
+                })
 
         }
     })
     .delete(auth, admin, async (req, res) => {
         try {
             const sku = await Sku.findById(req.params.id);
-            if(sku){ 
+            if (sku) {
                 await sku.delete()
                 res.status(200)
-                   .send({
-                       message : "the delete was successful"
-                   })
+                    .send({
+                        message: "the delete was successful"
+                    })
             }
             else {
                 res.status(404)
-                .send({
-                    message : "the sku entity was not found"
-                })
+                    .send({
+                        message: "the sku entity was not found"
+                    })
             }
 
         } catch (e) {
             res.status(400)
-            .send({
-                message : e.message
-            })
+                .send({
+                    message: e.message
+                })
 
         }
     })
-    
+
+router.get('/search', async (req, res) => {
+    try {
+        const query = req.query;
+        const qs = await Sku.find()
+        const filtered = qs.filter(
+            ({ name, category }) => {
+                let check = true;
+                for (let i in query) {
+                    if (i === "name") {
+                        if (!name.includes(query[i])) {
+                            check = false
+                            break;
+                        }
+                    } else {
+                        if (!category[i].includes(query[i])) {
+                            check = false;
+                            break
+                        }
+                    }
+                }
+                return check;
+            }
+        )
+
+        if (filtered.length > 0) {
+            res.status(200)
+                .send({
+                    message : "filter results compiled",
+                    data : filtered
+                })
+        } else {
+            res.status(404)
+                .send({
+                    message : "the filter didn't match"
+                })
+        }
+
+    } catch (e) {
+        res.status(400)
+            .send({
+                message: e.message
+            })
+    }
+})
+
 
 
 module.exports = router;

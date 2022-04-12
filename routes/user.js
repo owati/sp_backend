@@ -50,7 +50,6 @@ router.post('/login', async (req, res) => {
                     {
                         message: user[1],
                         userInfo: user[2]
-
                     }
                 );
         } else {
@@ -62,7 +61,7 @@ router.post('/login', async (req, res) => {
                 );
         }
     } catch (e) {
-
+        console.log(e.message)
     }
 });
 
