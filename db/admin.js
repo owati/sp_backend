@@ -16,11 +16,23 @@ const notifySchema = mongoose.Schema({
     }
 })
 
+const category = mongoose.Schema({
+    types : {
+        type : [String],
+    },
+    genders : {
+        type : [String],
+        default : ["male", "female"]
+    }
+})
+
 const Info = mongoose.model('Info', infoSchema)
 const Notify = mongoose.model('Notifys', notifySchema)
+const Category = mongoose.model("Category", category)
 
 
 module.exports = {
     Info,
-    Notify
+    Notify,
+    Category
 }

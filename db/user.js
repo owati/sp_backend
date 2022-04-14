@@ -57,9 +57,6 @@ const userSchema = mongoose.Schema(
 
 const User = mongoose.model('User', userSchema);
 
-async function generateToken (user) {
-    // the token generation
-}
 
 module.exports = {
     User: User,

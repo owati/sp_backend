@@ -4,6 +4,7 @@ const express = require('express');
 const { Sku } = require('../db/sku');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
+const {Category} = require('../db/admin');
 
 const router = express.Router()
 
@@ -136,7 +137,7 @@ router.route('/units/:id')
         }
     })
 
-router.get('/search', async (req, res) => {
+router.get('/search/filter', async (req, res) => {
     try {
 
         const { q } = req.query;
@@ -178,6 +179,62 @@ router.get('/search', async (req, res) => {
             })
     }
 })
+
+router.get('/search/suggest', async (req, res) => {
+    try {
+        const {q} = req.query;
+        const category = await Category.find()[0];
+        const skus = await Sku.find();
+        let suggestions = []
+
+        for (let i of category.types) {
+            if (i.includes(q)) {
+                suggestions.push(i)
+            }
+        }
+
+        for (let i of category.genders) {
+            if (i.includes(q)) {
+                suggestions.push(i);
+            }
+        }
+
+        for(let i of skus) {
+            if (i.name.includes(q)) {
+                suggestions.push(i.name)
+            }
+        }
+        if (suggestions.length == 0) {
+            res.status(404)
+               .send({
+                   message : "nothing matched your search"
+               })
+        } else {
+            shuffleArray(suggestions);
+
+            res.status(200)
+               .send({
+                   message : "here are the suggestions",
+                   data : suggestions.slice(0, 5)
+               })
+        }
+
+
+    } catch (e) {
+        res.status(400)
+           .send({
+               message : e.message
+           })
+    }
+})
+
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
 
 
 
