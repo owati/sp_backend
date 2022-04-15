@@ -8,6 +8,7 @@ const user_route = require("./routes/user");
 const sku_route = require('./routes/sku');
 const info_route = require('./routes/info');
 const notify_route = require('./routes/notify');
+const category_route = require('./routes/category');
 
 
 mongoose.connect('mongodb://localhost:27017/test')
@@ -35,6 +36,6 @@ app.use('/account', user_route);
 app.use('/sku', sku_route);
 app.use('/info', info_route);
 app.use('/notify', notify_route);
-
+app.use('/category', category_route)
 
 app.listen("3001")

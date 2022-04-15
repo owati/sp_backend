@@ -183,17 +183,17 @@ router.get('/search/filter', async (req, res) => {
 router.get('/search/suggest', async (req, res) => {
     try {
         const {q} = req.query;
-        const category = await Category.find()[0];
+        const category = await Category.find();
         const skus = await Sku.find();
         let suggestions = []
 
-        for (let i of category.types) {
+        for (let i of category[0].types) {
             if (i.includes(q)) {
                 suggestions.push(i)
             }
         }
 
-        for (let i of category.genders) {
+        for (let i of category[0].genders) {
             if (i.includes(q)) {
                 suggestions.push(i);
             }
