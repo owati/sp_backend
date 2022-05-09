@@ -116,28 +116,28 @@ router.route('/info')
                     }
                     await user.save()
                     res.status(202)
-                       .send({
-                           message : "user updated successfully",
-                           userInfo : user
-                       })
+                        .send({
+                            message: "user updated successfully",
+                            userInfo: user
+                        })
                 } else {
                     res.status(404)
-                       .send({
-                           message : "user entity was not found"
-                       })
+                        .send({
+                            message: "user entity was not found"
+                        })
                 }
             } else {
                 res.status(401)
-                   .send({
-                       message : "the token is invalid"
-                   })
+                    .send({
+                        message: "the token is invalid"
+                    })
             }
 
         } catch (e) {
             res.status(400)
-               .send({
-                   message : e.message
-               })
+                .send({
+                    message: e.message
+                })
         }
     })
     .delete(auth, async (req, res) => {
@@ -147,30 +147,272 @@ router.route('/info')
                 if (user) {
                     user.delete()
                     res.status(202)
-                       .send({
-                           message : "user was deleted successfully"
-                       })
+                        .send({
+                            message: "user was deleted successfully"
+                        })
                 } else {
                     res.status(404)
-                       .send({
-                           message : "user entity was not found"
-                       })
+                        .send({
+                            message: "user entity was not found"
+                        })
                 }
             } else {
                 res.status(401)
-                   .send({
-                       message : "the token is invalid"
-                   })
+                    .send({
+                        message: "the token is invalid"
+                    })
             }
 
         } catch (e) {
             res.status(400)
-               .send({
-                   message : e.message
-               })
+                .send({
+                    message: e.message
+                })
         }
 
     })
 
+router.route('/address')
+    .get(auth, async (req, res) => {
+        try {
+            if (req.user) {
+                const user = await User.findById(req.user?.user_id)
+                if (user) {
+                    res.status(200)
+                        .send({
+                            message: "address data found",
+                            data: user.address
+                        })
+                } else {
+                    res.status(200)
+                        .send({
+                            message: "user entity not found"
+                        })
+                }
+            } else {
+                res.status(401)
+                    .send({
+                        message: "token is no longer valid"
+                    })
+            }
+
+        } catch (e) {
+            res.status(400)
+                .send({
+                    message: e.message
+                })
+        }
+    })
+    .post(auth, async (req, res) => {
+        try {
+            if (req.user) {
+                const user = await User.findById(req.user?.user_id);
+                if (user) {
+                    if (user.address.length < 3) {
+                        const { address } = req.body
+                        if (address && (
+                            () => {
+                                return Object.keys(address).includes('address') &&
+                                    Object.keys(address).includes('phone')
+                            }
+                        )()) {
+                            if (user.address.length === 0) address.default = true;
+                            else address.default = false
+                            user.address = [
+                                ...user.address,
+                                address
+                            ]
+                            await user.save();
+
+                            res.status(201)
+                                .send({
+                                    message: "address added successfully",
+                                    address: user.address
+                                })
+                        } else {
+                            res.status(400)
+                                .send({
+                                    message: "data format not correct"
+                                })
+                        }
+                    } else {
+                        res.status(403)
+                            .send({
+                                message: "Only three adresses are allowed"
+                            })
+                    }
+                } else {
+                    res.status(404)
+                        .send({
+                            message: "user entity not found"
+                        })
+                }
+            } else {
+                res.status(401)
+                    .send({
+                        message: "token not valid"
+                    })
+            }
+
+        } catch (e) {
+            res.status(400)
+                .send({
+                    message: e.message
+                })
+        }
+    })
+    .put(auth, async (req, res) => {
+        try {
+            if (req.user) {
+                const user = await User.findById(req.user?.user_id);
+                if (user) {
+                    const { address, number } = req.body
+                    if (user.address.length > number) {
+                        if (address && (
+                            () => {
+                                return Object.keys(address).includes('address') &&
+                                    Object.keys(address).includes('phone')
+                            }
+                        )()) {
+                            user.address[number] = {
+                                ...user.address[number],
+                                ...address
+                            }
+                            await user.save();
+
+                            res.status(201)
+                                .send({
+                                    message: "address added successfully",
+                                    address: user.address
+                                })
+                        } else {
+                            res.status(400)
+                                .send({
+                                    message: "data format not correct"
+                                })
+                        }
+                    } else {
+                        res.status(400)
+                            .send({
+                                message: "the address number does not exist"
+                            })
+                    }
+                } else {
+                    res.status(404)
+                        .send({
+                            message: "user entity not found"
+                        })
+                }
+            } else {
+                res.status(401)
+                    .send({
+                        message: "token not valid"
+                    })
+            }
+
+        } catch (e) {
+            res.status(400)
+                .send({
+                    message: e.message
+                })
+        }
+    })
+    .delete(auth, async (req, res) => {
+        try {
+            if (req.user) {
+                const user = await User.findById(req.user?.user_id);
+                if (user) {
+                    const { number } = req.query;
+                    if (user.address.length > number) {
+                        const newAddresList = []
+                        for (const address of user.address) {
+                            if (user.address.indexOf(address) == number) {
+
+                            } else {
+                                newAddresList.push(address)
+                            }
+                        }
+
+                        user.address = [
+                            ...newAddresList
+                        ]
+                        await user.save();
+
+                        res.status(201)
+                            .send({
+                                message: "address updated successfully",
+                                address: user.address
+                            })
+                    } else {
+                        res.status(400)
+                            .send({
+                                message: "out of index"
+                            })
+                    }
+                } else {
+                    res.status(404)
+                        .send({
+                            message: "user entity not found"
+                        })
+                }
+            } else {
+                res.status(401)
+                    .send({
+                        message: "token not valid"
+                    })
+            }
+
+        } catch (e) {
+            res.status(400)
+                .send({
+                    message: e.message
+                })
+        }
+    })
+
+router.put('/address/default/:number', auth, async (req, res) => {
+    try {
+        const { number } = req.params
+        if (req.user) {
+            const user = await User.findById(req.user?.user_id);
+            if (user) {
+                if (user.address.length > number) {
+                    for (let i = 0; i < user.address.length; i++) {
+                        if (i == number) user.address[i].default = true
+                        else user.address[i].default = false
+                    }
+                    await user.save();
+
+                    res.status(200)
+                        .send({
+                            message: "default changed successfully",
+                            data: user.address
+                        })
+                } else {
+                    res.status(400)
+                        .send({
+                            message: "out of range"
+                        })
+                }
+            } else {
+                res.status(404)
+                    .send({
+                        message: "user entity not found"
+                    })
+            }
+        } else {
+            res.status(401)
+                .send({
+                    message: "token not valid"
+                })
+
+        }
+    } catch (e) {
+        res.status(400)
+            .send({
+                message: e.message
+            })
+    }
+})
 
 module.exports = router

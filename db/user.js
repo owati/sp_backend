@@ -35,6 +35,11 @@ const userSchema = mongoose.Schema(
             required: true
         },
 
+        address : {
+            type : [Object],
+            default : []
+        },
+
         date_created : {
             type : Date,
             immutable : true
