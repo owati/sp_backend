@@ -227,7 +227,7 @@ router.route('/address')
                             res.status(201)
                                 .send({
                                     message: "address added successfully",
-                                    address: user.address
+                                    data: user.address
                                 })
                         } else {
                             res.status(400)
@@ -280,10 +280,10 @@ router.route('/address')
                             }
                             await user.save();
 
-                            res.status(201)
+                            res.status(200)
                                 .send({
-                                    message: "address added successfully",
-                                    address: user.address
+                                    message: "address updated successfully",
+                                    data: user.address
                                 })
                         } else {
                             res.status(400)
@@ -338,10 +338,10 @@ router.route('/address')
                         ]
                         await user.save();
 
-                        res.status(201)
+                        res.status(200)
                             .send({
-                                message: "address updated successfully",
-                                address: user.address
+                                message: "address deleted successfully",
+                                data: user.address
                             })
                     } else {
                         res.status(400)
