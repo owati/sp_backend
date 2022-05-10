@@ -218,6 +218,9 @@ router.route('/address')
                         )()) {
                             if (user.address.length === 0) address.default = true;
                             else address.default = false
+
+                            if(!address.name) address.name = user.first_name + ' ' + user.last_name
+
                             user.address = [
                                 ...user.address,
                                 address
@@ -271,7 +274,7 @@ router.route('/address')
                         if (address && (
                             () => {
                                 return Object.keys(address).includes('address') &&
-                                    Object.keys(address).includes('phone')
+                                    Object.keys(address).includes('phone') && Object.keys(address).includes('name')
                             }
                         )()) {
                             user.address[number] = {
