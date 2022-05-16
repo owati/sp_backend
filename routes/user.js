@@ -105,13 +105,14 @@ router.route('/info')
         const body = req.body
         try {
             if (req.user) {
-                const user = await User.findById(req.user?.user_id).select('-password')
+                const user = await User.findById(req.user?.user_id)
 
                 if (user) {
                     for (let field in body) {
                         if (!["is_admin", "last_login", "date_created"].includes(field)) {
                             if (field === "password") {
                                 const { old, new_pass} = body.password
+                                console.log(old, user)
                                 if(await bcrypt.compare(old, user.password)) {
                                     user.password = await bcrypt.hash(new_pass , 10)
                                 } else {
@@ -119,6 +120,7 @@ router.route('/info')
                                        .send({
                                            message : "the old password is incorrect"
                                        })
+                                    return
                                 }
                             } else user[field] = body[field]
                         }
