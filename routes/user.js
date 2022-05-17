@@ -111,22 +111,22 @@ router.route('/info')
                     for (let field in body) {
                         if (!["is_admin", "last_login", "date_created"].includes(field)) {
                             if (field === "password") {
-                                const { old, new_pass} = body.password
+                                const { old, new_pass } = body.password
                                 console.log(old, user)
-                                if(await bcrypt.compare(old, user.password)) {
-                                    user.password = await bcrypt.hash(new_pass , 10)
+                                if (await bcrypt.compare(old, user.password)) {
+                                    user.password = await bcrypt.hash(new_pass, 10)
                                 } else {
                                     res.status(401)
-                                       .send({
-                                           message : "the old password is incorrect"
-                                       })
+                                        .send({
+                                            message: "the old password is incorrect"
+                                        })
                                     return
                                 }
                             } else user[field] = body[field]
                         }
                     }
                     await user.save()
-                    console.log(user,body)
+                    console.log(user, body)
                     res.status(202)
                         .send({
                             message: "user updated successfully",
@@ -231,7 +231,7 @@ router.route('/address')
                             if (user.address.length === 0) address.default = true;
                             else address.default = false
 
-                            if(!address.name) address.name = user.first_name + ' ' + user.last_name
+                            if (!address.name) address.name = user.first_name + ' ' + user.last_name
 
                             user.address = [
                                 ...user.address,
@@ -422,6 +422,167 @@ router.put('/address/default/:number', auth, async (req, res) => {
                 })
 
         }
+    } catch (e) {
+        res.status(400)
+            .send({
+                message: e.message
+            })
+    }
+})
+
+router.route('/cards').all(
+    auth, async (req, res, next) => {
+        try {
+            if (req.user) next();
+            else {
+                res.status(401)
+                    .send({
+                        message: "the token is not valid"
+                    })
+            }
+
+        } catch (e) {
+            res.status(400)
+                .send({
+                    message: e.message
+                })
+        }
+    }
+
+).get(async (req, res) => {
+    try {
+        const user = await User.findById(req.user?.user_id)
+        if (user) {
+            res.status(200)
+                .send({
+                    message: "card data fetched successfully",
+                    data: user.cards
+                })
+        } else {
+            res.status(404)
+                .send({
+                    message: "the user entity is not found"
+                })
+        }
+    } catch (e) {
+        res.status(400)
+            .send({
+                message: e.message
+            })
+    }
+}).post(async (req, res) => {
+    try {
+        const user = await User.findById(req.user?.user_id);
+        const { card } = req.body
+        if (user) {
+            if (user.cards.length < 3) {
+                if (card && (() => {
+                    const key_list = Object.keys(card);
+                    return key_list.includes('name') &&
+                        key_list.includes('number') &&
+                        key_list.includes('date') &&
+                        key_list.includes('cvv')
+                })()) {
+                    user.cards.push(card)
+                    await user.save()
+
+                    res.status(201)
+                        .send({
+                            message: "the card was added successfully",
+                            data: user.cards
+                        })
+                } else {
+                    res.status(400)
+                        .send({
+                            message: "the data format is not correct"
+                        })
+                }
+            } else {
+                res.status(403)
+                    .send({
+                        message: "only three cards are allowed"
+                    })
+            }
+        } else {
+            res.status(404)
+                .send({
+                    message: "the user entity not found"
+                })
+        }
+
+    } catch (e) {
+        res.status(400)
+            .send({
+                message: e.message
+            })
+    }
+}).put(async (req, res) => {
+    try {
+        const user = await User.findById(req.user?.user_id);
+        const { card, number } = req.body
+        if (user) {
+
+            if (card && (() => {
+                const key_list = Object.keys(card);
+                return key_list.includes('name') &&
+                    key_list.includes('number') &&
+                    key_list.includes('date') &&
+                    key_list.includes('cvv') &&
+                    (number < user.cards.length)
+                    && number >= 0
+            })()) {
+                user.cards[number] = card
+                await user.save()
+
+                res.status(201)
+                    .send({
+                        message: "the card was updated successfully",
+                        data: user.cards
+                    })
+            } else {
+                res.status(400)
+                    .send({
+                        message: "the data format is not correct"
+                    })
+            }
+
+        } else {
+            res.status(404)
+                .send({
+                    message: "the user entity not found"
+                })
+        }
+
+
+    } catch (e) {
+        res.status(400)
+            .send({
+                message: e.message
+            })
+    }
+}).delete(async (req, res) => {
+    try {
+        const user = await User.findById(req.user?.user_id)
+        if (user) {
+            const { number } = req.query;
+            if (number >= 0 && number < user.cards.length) {
+                user.cards = user.cards.filter(
+                    (card, index) => index != number
+                )
+                await user.save();
+                res.status(200)
+                    .send({
+                        message: "the card deleted successfully",
+                        data: user.cards
+                    })
+            } else {
+                res.status(400)
+                    .send({
+                        message: "index was out of range"
+                    })
+            }
+        }
+
     } catch (e) {
         res.status(400)
             .send({

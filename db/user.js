@@ -40,6 +40,11 @@ const userSchema = mongoose.Schema(
             default : []
         },
 
+        cards : {
+            type : [Object],
+            default : []
+        },
+
         date_created : {
             type : Date,
             immutable : true
