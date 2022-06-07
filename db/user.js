@@ -87,7 +87,7 @@ module.exports = {
                 return [401, `the ${!user ? "email" :"password"}  is incorrect`, null]
             }
         } catch (e) {
-            console.log(e)
+            console.log(e.message, 'pasas')
             return null
         }
     },

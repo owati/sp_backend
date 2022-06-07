@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors')
 
+const admin_routes = require('./routes/admin')
 const user_route = require("./routes/user");
 const sku_route = require('./routes/sku');
 const info_route = require('./routes/info');
@@ -37,5 +38,6 @@ app.use('/sku', sku_route);
 app.use('/info', info_route);
 app.use('/notify', notify_route);
 app.use('/category', category_route)
+app.use('/admin', admin_routes)
 
 app.listen("3001")

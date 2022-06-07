@@ -19,6 +19,11 @@ module.exports = async (req, res, next) => {
                         message: "the user entity was not found"
                     })
             }
+        } else {
+            res.status(401)
+                .send({
+                    message : "the token is not valid"
+                })
         }
     } catch (e) {
         res.status(400)
