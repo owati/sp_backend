@@ -1,12 +1,19 @@
 const express = require('express');
+const cloudinary = require('cloudinary')
+const multer = require('multer');
 
 
 const { Sku } = require('../db/sku');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
-const {Category} = require('../db/admin');
+const { Category } = require('../db/admin');
+const storage = require('../upload');
+const e = require('express');
 
 const router = express.Router()
+
+
+const upload = multer({ storage })
 
 router.route('/units')
     .get(async (req, res) => {
@@ -148,8 +155,8 @@ router.get('/search/filter', async (req, res) => {
                     return true;
                 }
                 else {
-                    for(let i in category) {
-                        if (category[i].includes(q)){
+                    for (let i in category) {
+                        if (category[i].includes(q)) {
                             return true;
                         }
                     }
@@ -182,7 +189,7 @@ router.get('/search/filter', async (req, res) => {
 
 router.get('/search/suggest', async (req, res) => {
     try {
-        const {q} = req.query;
+        const { q } = req.query;
         const category = await Category.find();
         const skus = await Sku.find();
         let suggestions = []
@@ -199,34 +206,90 @@ router.get('/search/suggest', async (req, res) => {
             }
         }
 
-        for(let i of skus) {
+        for (let i of skus) {
             if (i.name.includes(q)) {
                 suggestions.push(i.name)
             }
         }
         if (suggestions.length == 0) {
             res.status(404)
-               .send({
-                   message : "nothing matched your search"
-               })
+                .send({
+                    message: "nothing matched your search"
+                })
         } else {
             shuffleArray(suggestions);
 
             res.status(200)
-               .send({
-                   message : "here are the suggestions",
-                   data : suggestions.slice(0, 5)
-               })
+                .send({
+                    message: "here are the suggestions",
+                    data: suggestions.slice(0, 5)
+                })
         }
 
 
     } catch (e) {
         res.status(400)
-           .send({
-               message : e.message
-           })
+            .send({
+                message: e.message
+            })
     }
 })
+
+router.route('/image/:id')
+    .all(auth, admin)
+    .post(async (req, res, next) => {
+
+        const { id } = req.params;
+        try {
+            const sku = await Sku.findById(id);
+            if (sku) next();
+            else res.status(404)
+                .send({ message: 'the product with this id was not found' })
+        } catch (e) {
+            console.log(e.message)
+            res.status(422)
+                .send({ message: e.message })
+        }
+    },
+
+        upload.array('photos'),
+
+        async (req, res) => {
+            const { files, params } = req;
+
+            const image_list = [];
+            try {
+                for (const file of files) {
+                    cloudinary.v2.uploader.upload(
+                        files[0].path,
+                        callback = function (error, response) {
+                            if (error) {
+                                console.log(error.message);
+                                image_list.push('error')
+                            } else {
+                                image_list.push(response.url)
+                            }
+                        }
+                    )
+                }
+
+                const sku = await Sku.findById(params.id);
+                sku.images = image_list; await sku.save();
+
+                res.status(200)
+                    .send({
+                        message : 'Added the images successfully..',
+                        data : sku
+                    })
+
+            } catch (e) {
+                res.status(422)
+                    .send({
+                        message: e.message
+                    })
+            }
+
+        })
 
 
 function shuffleArray(array) {

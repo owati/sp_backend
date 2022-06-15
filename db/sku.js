@@ -1,63 +1,60 @@
 const mongoose = require("mongoose");
-/*
-category for the sku
-
-category -> {
-    gender -> male, female or unisex,
-    type -> trouser, jeans, cap, etc.
-    detail -> string
-}
-*/
 
 const skuSchema = mongoose.Schema({
     name : {  // the name of the sku
         type : String,
         required : true
     },
-    price : {  // the price
-        type : Number,
-        required : true
+    gender : {
+        type : String,
+        required : true // can be either male, female or unisex
     },
-
-    quantity : {  // the amount available in stock
-        type : Number,
-        required : true
+    categories : {
+        type : [String],
+        default : []
     },
-    category : {    // the categories the sku falls under...described above
-        type :  Object,
-        required : true
+    taps : {
+        type : [String],
+        default : [],
     },
-    description : {    // the sku description
+    headline : {
         type : String,
         required : true
     },
-    sizes : {        // the range of sizes available
-        type : [String],
+    description : {
+        type : String,
         required : true
     },
-    colors : {      // the available colors available
+    images : {
         type : [String],
-        required : true
+        default : []
     },
-
-    purchases : {   // the number of times the SKU has been purchased
-        type : Number,
-        default : 0
+    sizes :{
+        type : [String],
+        default : []
     },
-    discount : {     // the discount on the sku
-        type : Number,
-        default : 0
+    colors : {
+        type : [String],
+        default : []
     },
-
-    review : {        // the review number of the sku
-        type : Number,
-        default : 0
-    },
-
-    trending : {     // is the sku trending ?
+    availability : {
         type : Boolean,
-        default : false
-    }
+        default : true
+    },
+    quantity : {
+        type : Number,
+        required : true
+    },
+    price : {
+        type : Number,
+        required : true,
+    },
+    discount : {
+        type : Number,
+        required : true
+    },
+
+
 })
 
 const Sku = mongoose.model('Sku', skuSchema)

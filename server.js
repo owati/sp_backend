@@ -2,7 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const cors = require('cors')
+const cors = require('cors');
+const cloudinary = require('cloudinary');
 
 const admin_routes = require('./routes/admin')
 const user_route = require("./routes/user");
@@ -11,6 +12,12 @@ const info_route = require('./routes/info');
 const notify_route = require('./routes/notify');
 const category_route = require('./routes/category');
 
+cloudinary.config({
+    cloud_name: 'savage-phantom',
+    api_key: '578972336692379',
+    api_secret: 'Vkqk7kCduxpnQBl5MFN7lZMw5IQ',
+    secure: true
+})
 
 mongoose.connect('mongodb://localhost:27017/test')
 const db_conn = mongoose.connection
@@ -20,10 +27,10 @@ db_conn.on('open', () => {
 })
 const app = express();
 
-app.use(bodyParser.urlencoded({extended : true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors({
-    origin : ['http://localhost:3000']
+    origin: ['http://localhost:3000']
 }))
 
 app.use((req, res, next) => {
