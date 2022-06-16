@@ -13,7 +13,7 @@ const skuSchema = mongoose.Schema({
         type : [String],
         default : []
     },
-    taps : {
+    tags : {
         type : [String],
         default : [],
     },

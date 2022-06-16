@@ -1,3 +1,5 @@
+const fs = require('fs')
+
 const express = require('express');
 const cloudinary = require('cloudinary')
 const multer = require('multer');
@@ -43,10 +45,11 @@ router.route('/units')
         try {
             const body = req.body
             if (body) {
-                await Sku.create(body)
+                const sku = await Sku.create(body)
                 res.status(201)
                     .send({
-                        message: "new sku created"
+                        message: "new sku created",
+                        data : sku
                     })
             } else {
                 res.status(400)
@@ -238,7 +241,7 @@ router.get('/search/suggest', async (req, res) => {
 router.route('/image/:id')
     .all(auth, admin)
     .post(async (req, res, next) => {
-
+        console.log(req.body)
         const { id } = req.params;
         try {
             const sku = await Sku.findById(id);
@@ -252,7 +255,7 @@ router.route('/image/:id')
         }
     },
 
-        upload.array('photos'),
+        upload.array('image'),
 
         async (req, res) => {
             const { files, params } = req;
@@ -260,15 +263,17 @@ router.route('/image/:id')
             const image_list = [];
             try {
                 for (const file of files) {
-                    cloudinary.v2.uploader.upload(
-                        files[0].path,
+                    console.log(file)
+                    await cloudinary.v2.uploader.upload(
+                        file.path,
                         callback = function (error, response) {
                             if (error) {
-                                console.log(error.message);
                                 image_list.push('error')
                             } else {
                                 image_list.push(response.url)
                             }
+
+                            fs.rm(file.path) // removes the file
                         }
                     )
                 }
@@ -276,13 +281,14 @@ router.route('/image/:id')
                 const sku = await Sku.findById(params.id);
                 sku.images = image_list; await sku.save();
 
-                res.status(200)
+                res.status(201)
                     .send({
                         message : 'Added the images successfully..',
                         data : sku
                     })
 
             } catch (e) {
+                console.log(e.message)
                 res.status(422)
                     .send({
                         message: e.message
