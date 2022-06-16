@@ -22,7 +22,7 @@ const category = mongoose.Schema({
         required : true
     },
     skus : {
-        type : String,
+        type : [String],
         default : []
     }
 })
