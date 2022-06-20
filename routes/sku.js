@@ -273,7 +273,7 @@ router.route('/image/:id')
                                 image_list.push(response.url)
                             }
 
-                            fs.rm(file.path) // removes the file
+                            fs.unlinkSync(file.path) // removes the file
                         }
                     )
                 }
@@ -295,7 +295,7 @@ router.route('/image/:id')
                     })
             }
 
-        })
+        }) 
 
 
 function shuffleArray(array) {
