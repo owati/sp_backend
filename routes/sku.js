@@ -49,7 +49,7 @@ router.route('/units')
                 res.status(201)
                     .send({
                         message: "new sku created",
-                        data : sku
+                        data: sku
                     })
             } else {
                 res.status(400)
@@ -100,7 +100,6 @@ router.route('/units/:id')
                         sku[i] = body[i]
                     }
                 }
-                console.log("yeah")
                 await sku.save()
                 res.status(202)
                     .send({
@@ -239,64 +238,75 @@ router.get('/search/suggest', async (req, res) => {
 })
 
 router.route('/image/:id')
-    .all(auth, admin)
-    .post(async (req, res, next) => {
-        console.log(req.body)
-        const { id } = req.params;
-        try {
-            const sku = await Sku.findById(id);
-            if (sku) next();
-            else res.status(404)
-                .send({ message: 'the product with this id was not found' })
-        } catch (e) {
-            console.log(e.message)
-            res.status(422)
-                .send({ message: e.message })
-        }
-    },
-
-        upload.array('image'),
-
-        async (req, res) => {
-            const { files, params } = req;
-
-            const image_list = [];
+    .all(auth, admin,
+        async (req, res, next) => {
+            console.log(req.body)
+            const { id } = req.params;
             try {
-                for (const file of files) {
-                    console.log(file)
-                    await cloudinary.v2.uploader.upload(
-                        file.path,
-                        callback = function (error, response) {
-                            if (error) {
-                                image_list.push('error')
-                            } else {
-                                image_list.push(response.url)
-                            }
-
-                            fs.unlinkSync(file.path) // removes the file
-                        }
-                    )
-                }
-
-                const sku = await Sku.findById(params.id);
-                sku.images = image_list; await sku.save();
-
-                res.status(201)
-                    .send({
-                        message : 'Added the images successfully..',
-                        data : sku
-                    })
-
+                const sku = await Sku.findById(id);
+                if (sku) next();
+                else res.status(404)
+                    .send({ message: 'the product with this id was not found' })
             } catch (e) {
                 console.log(e.message)
                 res.status(422)
-                    .send({
-                        message: e.message
-                    })
+                    .send({ message: e.message })
+            }
+        },
+
+        upload.array('image'))
+
+    .post(async (req, res) => {
+        const { files, params } = req;
+
+        const image_list = [];
+        try {
+            for (const file of files) {
+                console.log(file)
+                await cloudinary.v2.uploader.upload(
+                    file.path,
+                    callback = function (error, response) {
+                        if (error) {
+                            image_list.push('error')
+                        } else {
+                            image_list.push(response.url)
+                        }
+
+                        fs.unlinkSync(file.path) // removes the file
+                    }
+                )
             }
 
-        }) 
+            const sku = await Sku.findById(params.id);
+            sku.images = image_list; await sku.save();
 
+            res.status(201)
+                .send({
+                    message: 'Added the images successfully..',
+                    data: sku
+                })
+
+        } catch (e) {
+            console.log(e.message)
+            res.status(422)
+                .send({
+                    message: e.message
+                })
+        }
+
+    })
+    .put(async (req, res) => {
+        const { files, params } = req;
+        console.log(files)
+        const image_list = [];
+        try {
+            for (const image of files) {
+                console.log(files)
+            }
+        } catch (e) {
+            console.log(e.message)
+        }
+    })
 
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
