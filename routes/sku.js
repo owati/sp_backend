@@ -296,13 +296,36 @@ router.route('/image/:id')
 
     })
     .put(async (req, res) => {
-        const { files, params } = req;
-        console.log(files)
-        const image_list = [];
+        const { files, params, body } = req;
         try {
+            const positions = JSON.parse(Object.entries(body)[0][1]);
+            const image_list = [];
             for (const image of files) {
-                console.log(files)
+                await cloudinary.v2.uploader.upload(
+                    image.path,
+                    callback = function (error, response) {
+                        if (error) {
+                            image_list.push('error')
+                        } else {
+                            image_list.push(response.url)
+                        }
+
+                        fs.unlinkSync(image.path) // removes the file
+                    }
+                )
             }
+
+            const sku = await Sku.findById(params.id);
+            positions.forEach((pos, index) => { // updates only the changed images
+                sku.images[pos] = image_list[index]
+            });
+
+            await sku.save();
+
+            res.status(200)
+                .send({
+                    message : 'The product was uploaded successfully'
+                })
         } catch (e) {
             console.log(e.message)
         }
