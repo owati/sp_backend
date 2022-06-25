@@ -50,11 +50,19 @@ router.route('/:id')
         const { id } = req.params;
         try {
             const category = await Category.findById(id);
-            if (category) res.status(200)
-                .send({
-                    message: 'category fetched successfully',
-                    data: { category, skus: category.skus.map( async (id) => await Sku.findById(id)) }
-                })
+            if (category) {
+                const sku_list = [];
+                for(const id of category.skus) {
+                    //console.log(id)
+                    const sku = await Sku.findById(id);
+                    sku_list.push(sku);
+                }
+                res.status(200)
+                    .send({
+                        message: 'category fetched successfully',
+                        data: { category, skus: sku_list }
+                    })
+            }
             else res.status(404)
                 .send({
                     message: 'the entity not found'
@@ -83,10 +91,18 @@ router.route('/:id')
 
                     await category.save();
 
+                    //console.log(category.skus, 'the skus')
+
+                    const sku_list = [];
+                    for (const id of category.skus) {
+                        const sku = await Sku.findById(id)
+                        sku_list.push(sku);
+                    }
+
                     res.status(200)
                         .send({
                             message: 'product was updated successfully',
-                            data: { category, skus: category.skus.map(async (id) => await Sku.findById(id)) },
+                            data: { category, skus: sku_list }
                         })
                 }
 
@@ -112,12 +128,12 @@ router.route('/:id')
                 await category.delete()
                 res.status(200)
                     .send({
-                        message : "the category has been deleted successfully",
+                        message: "the category has been deleted successfully",
                     })
             } else {
                 res.status(404)
                     .send({
-                        message : 'the entity was not found'
+                        message: 'the entity was not found'
                     })
             }
 
