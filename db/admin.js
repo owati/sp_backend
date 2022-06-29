@@ -70,7 +70,7 @@ const discounts = mongoose.Schema({
         default : 'all'
     },
     list : {
-        type : [String],
+        type : [String | Object],
         default : []
     },
     active : {

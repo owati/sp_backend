@@ -61,22 +61,27 @@ router.route('/:id')
         try {
             const { id } = req.params;
             const discount = await Discounts.findById(id);
+            let discount_copy;
 
             if (discount) {
-                if (discount.application === 'product') {
+                console.log(discount)
+                if (discount.application === 'products') {
                     const sku_list = [];
                     for (const id of discount.list) {
                         const sku = await Sku.findById(id);
                         sku_list.push(sku)
                     }
-                    discount.list = sku_list;
-
-                    res.status(200)
-                        .send({
-                            message: 'The discount entity was found',
-                            data: discount
-                        })
+                    discount_copy = {
+                        ...discount._doc,
+                        list : sku_list
+                    }
                 }
+
+                res.status(200)
+                    .send({
+                        message: 'The discount entity was found',
+                        data: discount.application === 'products' ? discount_copy : discount
+                    })
             } else {
                 res.status(404)
                     .send({
@@ -94,58 +99,81 @@ router.route('/:id')
     .put(async (req, res) => {
         try {
             const { id } = req.params;
-            const { body } = req.body;
+            const { body } = req;
 
             const discount = await Discounts.findById(id);
 
             if (discount) {
                 for (const field in body) {
+                    
                     if (field === 'application') {
+                       
                         if (DISCOUNT_APPLICATIONS.includes(body[field])) {
-                            body.application = body[field]
+                            discount.application = body[field]
                         }
                     } else {
                         discount[field] = body[field]
                     }
                 }
+
+                await discount.save()
+                let discount_copy;
+                if (discount.application === 'products') {
+                    const sku_list = [];
+                    for (const id of discount.list) {
+                        const sku = await Sku.findById(id);
+                        sku_list.push(sku)
+                    }
+                    discount_copy = {
+                        ...discount._doc,
+                        list : sku_list
+                    }
+                }
+
+                res.status(200)
+                    .send({
+                        message: 'The discount entity was found',
+                        data: discount.application === 'products' ? discount_copy : discount
+                    })
             } else {
                 res.status(404)
                     .send({
-                        message : 'The products was not found'
+                        message: 'The products was not found'
                     })
             }
 
         } catch (e) {
             res.status(400)
                 .send({
-                    message : e.message
+                    message: e.message
                 })
         }
     })
-    .delete(async (req , res) => {
+    .delete(async (req, res) => {
         try {
-            const {id} = req.params
+            const { id } = req.params
             const discount = await Discounts.findById(id);
 
             if (discount) {
                 await discount.delete();
                 res.status(200)
                     .send({
-                        message : 'The discount was deleted successfully'
+                        message: 'The discount was deleted successfully'
                     })
             } else {
                 res.status(404)
                     .send({
-                        message : 'The product was not found'
+                        message: 'The product was not found'
                     })
             }
 
         } catch (e) {
             res.status(400)
                 .send({
-                    message : e.message
+                    message: e.message
                 })
         }
     })
 
 
+module.exports = router
