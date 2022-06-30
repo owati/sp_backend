@@ -44,11 +44,11 @@ router.route('/')
                 const trending = await Trending.findOne();
                 if (trending) {
                     res.status(422)
-                        send({
+                        .send({
                             message : 'there can only be one category'
                         })
                 } else {
-                    const trend = await Trending.create();
+                    await Trending.create({});
                     res.status(201)
                         .send({
                             message : 'the trending has been created'
@@ -79,7 +79,7 @@ router.route('/')
                     res.status(200)
                         .send({
                             message : 'the update was successful',
-                            data : skus
+                            data : sku_list
                         })
                 }
 
@@ -134,11 +134,11 @@ router2.route('/')
                 const newReleases = await NewReleases.findOne();
                 if (newReleases) {
                     res.status(422)
-                        send({
+                        .send({
                             message : 'there can only be one new releases'
                         })
                 } else {
-                    const newRelease = await NewReleases.create();
+                    await NewReleases.create({});
                     res.status(201)
                         .send({
                             message : 'the new releases has been created'
@@ -169,7 +169,7 @@ router2.route('/')
                     res.status(200)
                         .send({
                             message : 'the update was successful',
-                            data : skus
+                            data : sku_list
                         })
                 }
 
