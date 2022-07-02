@@ -150,23 +150,23 @@ router.get('/search/filter', async (req, res) => {
     try {
 
         const { q } = req.query;
-        const qs = await Sku.find()
-        const filtered = qs.filter(
-            ({ name, category }) => {
-                if (name.includes(q)) {
-                    return true;
-                }
-                else {
-                    for (let i in category) {
-                        if (category[i].includes(q)) {
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-
+        const skus = await Sku.find();
+        const category = await Category.findOne({ name: q });
+        const filtered = [];
+        if (category) {
+            filtered.push(...skus.filter(
+                sku => category.skus.includes(sku._id)
+            ))
+        } else {
+            filtered.push(...skus.filter(
+                sku => sku.tags.includes(q)
+            ))
+            if (filtered.length == 0) {
+                filtered.push(...skus.filter(
+                    sku => sku.name.includes(q)
+                ))
             }
-        )
+        }
 
         if (filtered.length > 0) {
             res.status(200)
@@ -192,27 +192,20 @@ router.get('/search/filter', async (req, res) => {
 router.get('/search/suggest', async (req, res) => {
     try {
         const { q } = req.query;
-        const category = await Category.find();
+        const categories = await Category.find();
         const skus = await Sku.find();
-        let suggestions = []
+        const suggestions = [];
 
-        for (let i of category[0].types) {
-            if (i.includes(q)) {
-                suggestions.push(i)
-            }
+        for (const sku of skus) {
+            if (sku.name.includes(q)) suggestions.push(sku.name)
+
+            if (sku.tags.includes(q)) suggestions.push(q)
         }
 
-        for (let i of category[0].genders) {
-            if (i.includes(q)) {
-                suggestions.push(i);
-            }
+        for (const cat of categories) {
+            if (cat.name.includes(q)) suggestions.push(cat.name)
         }
 
-        for (let i of skus) {
-            if (i.name.includes(q)) {
-                suggestions.push(i.name)
-            }
-        }
         if (suggestions.length == 0) {
             res.status(404)
                 .send({
@@ -324,12 +317,38 @@ router.route('/image/:id')
 
             res.status(200)
                 .send({
-                    message : 'The product was uploaded successfully'
+                    message: 'The product was uploaded successfully'
                 })
         } catch (e) {
             console.log(e.message)
+            res.status(422)
+                .send({
+                    message: e.message
+                })
         }
-    })
+    }
+)
+
+router.get('/bestseller', async (req, res) => {
+    try {
+        const skus = await Sku.find();
+        const best_seller = skus.sort(
+            (a,b) => b.purchase_count - a.purchase_count
+        )
+
+        res.status(200)
+            .send({
+                message : 'The fetch was successful',
+                data : best_seller.slice(0,10)
+            })
+    } catch (e) {
+        res.status(400)
+            .send({
+                message : e.message
+            }
+        )
+    }
+})
 
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {

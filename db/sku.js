@@ -56,9 +56,11 @@ const skuSchema = mongoose.Schema({
     date_created : {
         type : Date,
         default : Date.now
+    },
+    purchase_count : {
+        type : Number,
+        default : 0
     }
-
-
 })
 
 const Sku = mongoose.model('Sku', skuSchema)
