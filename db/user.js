@@ -60,17 +60,34 @@ const userSchema = mongoose.Schema(
             immutable : true
         },
 
-        token : String
+        token : String,
+
+        favourites : {
+            type : [String],
+            default : []
+        }
     }
 )
 
 
+const cart = mongoose.Schema({
+    user : {
+        type : String, // the id of the user
+        required : true
+    },
+    sku_list : {
+        type : [Object], // of the form {id : sku_id, data : {quantity : 0, size : s, color : #polas }}
+        default : []
+    }
+})
+
 const User = mongoose.model('User', userSchema);
+const Cart = mongoose.model('Cart', cart)
 
 
 module.exports = {
     User: User,
-
+    Cart: Cart,
     authenticate: async (email, password) => {
         try {
             let user = await User.findOne({email});
