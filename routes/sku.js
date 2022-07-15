@@ -66,6 +66,28 @@ router.route('/units')
         }
     })
 
+router.get('/units/some', async (req, res) => {
+    try {
+        const list =JSON.parse(req.query.list)
+        const sku_list = []
+        for(const id of list) {
+            const sku = await Sku.findById(id);
+            sku_list.push(sku)
+        }
+
+        res.status(200)
+            .send({
+                message : 'the skus fetched successful',
+                data : sku_list
+            })
+    } catch (e) {
+        res.status(400)
+            .send({
+                message : e.message
+            })
+    }
+})
+
 router.route('/units/:id')
     .get(async (req, res) => {
         try {

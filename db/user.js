@@ -71,6 +71,7 @@ const userSchema = mongoose.Schema(
 
 
 const cart = mongoose.Schema({
+    
     user : {
         type : String, // the id of the user
         required : true
