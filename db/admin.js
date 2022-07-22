@@ -66,7 +66,7 @@ const discounts = mongoose.Schema({
         type : Date,
     },
     application : {
-        type : String, // can be either all, categories, collections, tags, products
+        type : String, // can be either all, categories, collections, products
         default : 'all'
     },
     list : {
