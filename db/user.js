@@ -82,13 +82,42 @@ const cart = mongoose.Schema({
     }
 })
 
+
+const order = mongoose.Schema({
+    user : {
+        type : String, // the id of the user if any
+    }, 
+    personal_info : {
+        type : Object, // the personal info of the buyer
+        required : true
+    },
+    shipping_data : {
+        type : Object,
+        required : true
+    },
+    delivery : {
+        type : Boolean,
+        required : true
+    },
+    date_created : {
+        type : Date,
+        default : Date.now
+    }, 
+    status : {
+        type : [Object],
+        default : [{status : 'places', date : Date.now()}]
+    }
+})
+
 const User = mongoose.model('User', userSchema);
-const Cart = mongoose.model('Cart', cart)
+const Cart = mongoose.model('Cart', cart);
+const Order = mongoose.model('Order', order)
 
 
 module.exports = {
     User: User,
     Cart: Cart,
+    Order : Order,
     authenticate: async (email, password) => {
         try {
             let user = await User.findOne({email});
