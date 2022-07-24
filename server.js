@@ -14,6 +14,7 @@ const category_route = require('./routes/category');
 const {trending_routes, newReleases_routes} = require('./routes/trending');
 const discount_routes = require('./routes/discounts');
 const pref_routes = require('./routes/pref')
+const order_routes = require('./routes/orders')
 
 cloudinary.config({
     cloud_name: 'savage-phantom',
@@ -33,7 +34,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors({
-    origin: ['http://localhost:3000']
+    origin: ['http://localhost:3000', 'http://localhost:3002']
 }))
 
 app.use((req, res, next) => {
@@ -53,5 +54,6 @@ app.use('/trending', trending_routes);
 app.use('/newReleases', newReleases_routes);
 app.use('/discount', discount_routes)
 app.use('/pref', pref_routes)
+app.use('/orders', order_routes)
 
 app.listen("3001")

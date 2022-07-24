@@ -87,6 +87,11 @@ const order = mongoose.Schema({
     user : {
         type : String, // the id of the user if any
     }, 
+
+    finalCost : {
+        type : Number,
+        required : true
+    },
     personal_info : {
         type : Object, // the personal info of the buyer
         required : true
@@ -105,7 +110,7 @@ const order = mongoose.Schema({
     }, 
     status : {
         type : [Object],
-        default : [{status : 'places', date : Date.now()}]
+        default : [{status : 'placed', date : Date.now()}]  // status can either be placed, process, delivery, done 
     }
 })
 
