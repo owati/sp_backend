@@ -86,10 +86,18 @@ const cart = mongoose.Schema({
 const order = mongoose.Schema({
     user : {
         type : String, // the id of the user if any
-    }, 
-
+    },
+    
+    id : {
+        type : Number
+    },
     finalCost : {
         type : Number,
+        required : true
+    },
+
+    order_list : {
+        type : [Object],
         required : true
     },
     personal_info : {
