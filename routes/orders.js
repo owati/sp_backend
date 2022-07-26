@@ -1,5 +1,6 @@
 const e = require('express');
 const express = require('express');
+const { Sku } = require('../db/sku');
 const { User, Order } = require('../db/user');
 const admin = require('../middleware/admin')
 const auth = require('../middleware/auth')
@@ -10,7 +11,7 @@ const STATUS_TYPES = [
 
 const router = express.Router()
 
-router.route('/user/')
+router.route('/user')
     .all(auth, (req, res, next) => {
         if (req?.user) next()
         else {
@@ -22,11 +23,19 @@ router.route('/user/')
     })
     .get(async (req, res) => {
         try {
-            const query = req
+            const {query} = req
+            
+            
             if (query?.id) {
-                const order = await Order.findById(query?.id)
-
+                const order = await Order.findOne({id : query?.id})
                 if (order) {
+                    for (let i = 0; i < order.order_list.length; i++) {
+                        const item = order.order_list[i]
+                        const sku = await Sku.findById(item.id);
+                        order.order_list[i].sku = sku
+                    }
+
+                    console
                     res.status(200)
                         .send({
                             message: 'The fetch was successful',
@@ -60,7 +69,13 @@ router.route('/user/')
 
             // the logic to confirm the user payment
 
-            const order = await Order.create(body);
+            const count = await Order.count();
+
+            const id = (getCode(count))
+
+            
+
+            const order = await Order.create({...body, id});
 
             res.status(201)
                 .send({
@@ -182,3 +197,18 @@ router.route('/admin/:id')
 
 
 module.exports = router
+
+
+function getCode(number) {
+    let startString = ''
+    for (let i  = 0; i < 4; i ++) {
+        const rand = Math.floor(Math.random() * 26) + 65; // generates a number between 65 and 91
+        startString += String.fromCharCode(rand);
+    }
+    const numLength = String(number).length;
+    if ( numLength === 1) {
+        return startString + '00' + number
+    } else {
+        return startString + '0' + number
+    }
+}

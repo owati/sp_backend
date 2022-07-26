@@ -89,7 +89,8 @@ const order = mongoose.Schema({
     },
     
     id : {
-        type : Number
+        type : String,
+        required : true
     },
     finalCost : {
         type : Number,
