@@ -34,8 +34,6 @@ router.route('/user')
                         const sku = await Sku.findById(item.id);
                         order.order_list[i].sku = sku
                     }
-
-                    console
                     res.status(200)
                         .send({
                             message: 'The fetch was successful',
@@ -114,8 +112,14 @@ router.route('/admin/:id')
     .get(async (req, res) => {
         try {
             const { id } = req.params
-            const order = await Order.findById(id);
+            const order = await Order.findOne({id});
+
             if (order) {
+                for (let i = 0; i < order.order_list.length; i++) {
+                    const item = order.order_list[i]
+                    const sku = await Sku.findById(item.id);
+                    order.order_list[i].sku = sku
+                }
                 res.status(200)
                     .send({
                         message: 'the fetch was successful',
@@ -142,21 +146,37 @@ router.route('/admin/:id')
             const {status} = req.body
 
             const current_time = Date.now()
-            const order = await Order.findById(id);
+            const order = await Order.findOne({id});
 
             if (order) {
                 if (status) {
-                    if (STATUS_TYPES.includes(status) && status !== 'placed') {
+                    if (STATUS_TYPES.includes(status)) {
+                        const stat_index = STATUS_TYPES.indexOf(status);
 
-                        if(STATUS_TYPES.indexOf(status) === order.status.length) {
+                        console.log(order.status.length, stat_index)
+                        if(stat_index <= order.status.length) {
+                            if (stat_index === order.status.length) {
+                                order.status.push({
+                                    status : status,
+                                    date : current_time
+                                });
+                            } else {
+                                const new_list = [];
+                                for(let i  = 0; i < order.status.length; i++) {
+                                    new_list.push(order.status[i]);
+                                    if (i === stat_index) break;
+                                }
 
-                            order.status.push({
-                                status : status,
-                                date : current_time
-                            });
+                                order.status = [...new_list];
+                            }
 
                             await order.save();
 
+                            for (let i = 0; i < order.order_list.length; i++) {
+                                const item = order.order_list[i]
+                                const sku = await Sku.findById(item.id);
+                                order.order_list[i].sku = sku
+                            }
                             res.status(200)
                                 .send({
                                     message : 'The status was updated successfully',

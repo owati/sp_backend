@@ -96,6 +96,18 @@ const order = mongoose.Schema({
         type : Number,
         required : true
     },
+    shippingCost : {
+        type : Number,
+        required : true
+    },
+    totalCost : {
+        type : Number,
+        required : true
+    },
+    discountCost : {
+        type : Number,
+        required : true
+    },
 
     order_list : {
         type : [Object],
