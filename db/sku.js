@@ -49,6 +49,10 @@ const skuSchema = mongoose.Schema({
         type : Number,
         required : true,
     },
+    ratings : {
+        type : Number,
+        default : 0
+    },
     discount : {
         type : Number,
         required : true
@@ -63,8 +67,49 @@ const skuSchema = mongoose.Schema({
     }
 })
 
+const reviewSchema = mongoose.Schema({
+    sku : {
+        type : String,
+        required : true
+    },
+    user : {
+        type : String,
+        required : true
+    },
+    rate : {
+        type : Number,
+        required : true
+    },
+    headline : {
+        type : String,
+        required : true
+    },
+    details : {
+        type : String
+    },
+    size : {
+        type : String, // small, accurate, big
+        required : true
+    },
+    comfort : {
+        type : String, // Not Comfortable, Average, Very Comfortable
+        required : true
+    },
+    durability : {
+        type : String, // Not Durable, Average, Very Durable
+        required : true
+    },
+    date_created : {
+        type : String,
+        default : Date.now
+    }
+
+})
+
 const Sku = mongoose.model('Sku', skuSchema)
+const Review = mongoose.model('Review', reviewSchema)
 
 module.exports = {
-    Sku
+    Sku,
+    Review
 }

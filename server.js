@@ -15,6 +15,7 @@ const {trending_routes, newReleases_routes} = require('./routes/trending');
 const discount_routes = require('./routes/discounts');
 const pref_routes = require('./routes/pref')
 const order_routes = require('./routes/orders')
+const review_routes = require('./routes/reviews')
 
 cloudinary.config({
     cloud_name: 'savage-phantom',
@@ -55,5 +56,6 @@ app.use('/newReleases', newReleases_routes);
 app.use('/discount', discount_routes)
 app.use('/pref', pref_routes)
 app.use('/orders', order_routes)
+app.use('/reviews', review_routes)
 
 app.listen("3001")
