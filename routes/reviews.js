@@ -13,9 +13,13 @@ router.post('/:skuid/:userid', async (req, res) => {
 
             if (sku && user) {
 
-                const review_count = Review.count({sku : id});
-                const review = await Review.create({...req.body, sku : id, 
+                const review_count = await Review.count({sku : skuid});
+                console.log(review_count);
+                
+                const review = await Review.create({...req.body, sku : skuid, 
                                         user : user.first_name + ' ' + user.last_name});
+
+                console.log(sku.ratings, review_count, review.rate)
 
                 sku.ratings = (sku.ratings*review_count + review.rate) / (review_count + 1);
 
@@ -65,7 +69,7 @@ router.get('', async (req, res) => {
             res.status(200)
                 .send({
                     message : 'The reviews was fetched successfully',
-                    data : {reviews, name : sku_obj.name}
+                    data : {reviews, name : sku_obj.name, rating : sku_obj.ratings}
                 })
         }
     } catch (e) {
