@@ -1,11 +1,17 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-
+const cloudinary = require('cloudinary');
+const multer = require('multer');
+const fs = require('fs')
 
 const router = express.Router()
 
+const storage = require('../upload');
 const { User, authenticate } = require('../db/user');
 const auth = require('../middleware/auth');
+
+
+const upload = multer({ storage })
 
 router.post('/signup', async (req, res) => {    // for the signup
     const data = req.body;
@@ -591,4 +597,50 @@ router.route('/cards').all(
     }
 })
 
-module.exports = router
+
+router.post('/profile/image', auth,
+    upload.single('image'),
+    async (req, res) => {
+        try {
+            const user = await User.findById(req.user?.user_id);
+            if (user) {
+                const { file } = req;
+
+                let image_url = ''
+                await cloudinary.v2.uploader.upload(
+                    file.path,
+                    callback = function (error, response) {
+                        fs.unlinkSync(file.path)
+                        if (error) {
+                            res.status(400)
+                                .send({
+                                    message: error.message
+                                })
+                        } else {
+                            image_url = response.url
+                        }
+                    }
+                )
+                user.profile_image = image_url;
+                await user.save();
+
+                res.status(200)
+                    .send({
+                        message: 'The profile picture has been updated successfully',
+                        data: user
+                    })
+            } else {
+                res.status(404)
+                    .send({
+                        message: 'The user was not found'
+                    })
+            }
+        } catch (e) {
+            res.status(400)
+                .send({
+                    message: e.message
+                })
+        }
+    })
+
+module.exports = router;

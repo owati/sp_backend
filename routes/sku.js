@@ -10,7 +10,6 @@ const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const { Category } = require('../db/admin');
 const storage = require('../upload');
-const e = require('express');
 
 const router = express.Router()
 

@@ -27,6 +27,10 @@ const userSchema = mongoose.Schema(
             }
         },
 
+        profile_image : {
+            type : String,
+        },
+
         birth_date : Date,
         phone_no : String,
 
