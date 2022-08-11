@@ -180,7 +180,11 @@ router.get('/search/filter', async (req, res) => {
             ))
         } else {
             filtered.push(...skus.filter(
-                sku => sku.tags.includes(q)
+                sku => {
+                    for(const tag of sku.tags) {
+                        if (tag === q) return true
+                    } return false
+                }
             ))
             if (filtered.length == 0) {
                 filtered.push(...skus.filter(
@@ -218,13 +222,15 @@ router.get('/search/suggest', async (req, res) => {
         const suggestions = [];
 
         for (const sku of skus) {
-            if (sku.name.includes(q)) suggestions.push(sku.name)
+            if (sku.name.toLowerCase().includes(q)) suggestions.push(sku.name)
 
-            if (sku.tags.includes(q)) suggestions.push(q)
+            for (const tag of sku.tags) {
+                if (tag.toLowerCase().includes(q)) suggestions.push(tag)
+            }
         }
 
         for (const cat of categories) {
-            if (cat.name.includes(q)) suggestions.push(cat.name)
+            if (cat.name.toLowerCase().includes(q)) suggestions.push(cat.name)
         }
 
         if (suggestions.length == 0) {
