@@ -87,6 +87,42 @@ const discounts = mongoose.Schema({
     }
 })
 
+
+const collections = mongoose.Schema({
+    name : {
+        type : String,
+        required : true
+    }, 
+    headline : {
+        type : String,
+        required : true
+    },
+    tags : {
+        type : [String]
+    },
+    head_image : {  // url for the headimage
+        type : String
+    },
+    sub_image_2 : {  // the url of the image carousel at the base
+        type : [String]
+    },
+
+    sub_video_3 : { // the url of the video of the collection
+        type : String
+    },
+     
+    sub_images_4 : { // the url of the base section image
+        type : [String]
+    },
+
+    bottom_image : {
+        type : String // the bottom image url
+    },
+    skus : {
+        type : [String]
+    }
+})
+
 const Info = mongoose.model('Info', infoSchema)
 const Notify = mongoose.model('Notifys', notifySchema)
 const Category = mongoose.model("Category", category);
