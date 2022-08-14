@@ -93,7 +93,7 @@ const collections = mongoose.Schema({
         type : String,
         required : true
     }, 
-    headline : {
+    headline : { // url for the head image
         type : String,
         required : true
     },
@@ -103,11 +103,11 @@ const collections = mongoose.Schema({
     head_image : {  // url for the headimage
         type : String
     },
-    sub_image_2 : {  // the url of the image carousel at the base
+    sub_image_2 : {  // the url of the image carousel at the base (3 in number)
         type : [String]
     },
 
-    sub_video_3 : { // the url of the video of the collection
+    sub_video_3 : { // the url of the video of the collection 
         type : String
     },
      
@@ -119,7 +119,8 @@ const collections = mongoose.Schema({
         type : String // the bottom image url
     },
     skus : {
-        type : [String]
+        type : [String],
+        default : []
     }
 })
 
@@ -129,6 +130,7 @@ const Category = mongoose.model("Category", category);
 const Trending = mongoose.model('Trending', trending);
 const NewReleases = mongoose.model('New Releases', newReleases);
 const Discounts = mongoose.model('Discount', discounts);
+const Collections = mongoose.model('Collection', collections)
 
 
 
@@ -138,5 +140,6 @@ module.exports = {
     Category,
     Trending,
     NewReleases,
-    Discounts
+    Discounts, 
+    Collections
 }
