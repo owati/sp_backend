@@ -114,12 +114,50 @@ router.route('/:id')
         }
     })
 
-    // .put(auth, admin, 
-    //     upload.array()
-    //     async(req, res) => {
-    //     try {
+    .put(auth, admin, 
+        upload.array(),
+        async(req, res) => {
+        try {
+            const {params, body, files} = req;
 
-    //     }
-    // }) 
+            const collection = await Collections.findById(params.id);
+
+            if (collection) {
+                for(const [field, value] of Object.entries(body)) {
+                    if (field !== 'positions') collection[field] = value;
+                }
+
+                if (files) {
+                    const image_urls = []
+                    for (const {path} of files) {
+                        cloudinary.v2.uploader.upload(
+                            path,
+                            callback=function(error, response) {
+                                if(error) {
+                                    image_urls.push('error')
+                                } else {
+                                    image_urls.push(response.url)
+                                }
+                            }
+                        )
+                    }
+
+
+                }
+
+            } else {
+                res.status(404)
+                    .send({
+                        message : 'The collection was not found'
+                    })
+            }
+            
+        } catch (e) {
+            res.status(500)
+                .send({
+                    message : e.message
+                })
+        }
+    }) 
 
 module.exports = router
