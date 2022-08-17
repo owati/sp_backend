@@ -7,7 +7,8 @@ const { Collections } = require('../db/admin')
 const storage = require('../upload');
 const { Sku } = require('../db/sku');
 const auth = require('../middleware/auth')
-const admin = require('../middleware/admin')
+const admin = require('../middleware/admin');
+const e = require('express');
 
 const upload = multer({ storage });
 
@@ -33,16 +34,19 @@ router.route('/')
 
 
     .post(auth, admin,
-        upload.array('images'),
+        upload.array('image'),
         async (req, res) => {
             try {
                 const { body, files } = req;
 
+                console.log(req, files, body)
                 const collection = await Collections.create({ ...body });
 
                 const image_list = [];
-                for (const { path } of files) {
-                    await cloudinary.v2.uploader.upload(
+                for (let i = 0; i < files.length; i++) {
+                    console.log('runing for filr', path);
+                    const { path } = files[i]
+                    i !== 4 ? await cloudinary.v2.uploader.upload(
                         path,
                         callback = function (error, response) {
                             if (error) {
@@ -50,9 +54,24 @@ router.route('/')
                             } else {
                                 image_list.push(response.url)
                             }
-                            fs.unlinkSync(path)
+                            // try {
+                            //     fs.unlinkSync(path)
+                            // } catch (e) {
+
+                            // }
                         }
-                    )
+                    ) : cloudinary.v2.uploader.upload("dog.mp4",
+                        {
+                            resource_type: "video",
+                            public_id: "myfolder/videos/dog_closeup",
+                            chunk_size: 6000000,
+                            eager: [
+                                { width: 300, height: 300, crop: "pad", audio_codec: "none" },
+                                { width: 160, height: 100, crop: "crop", gravity: "south", audio_codec: "none" }],
+                            eager_async: true,
+                            //eager_notification_url: "https://mysite.example.com/notify_endpoint"
+                        },
+                        function (error, result) { console.log(result, error) });
                 }
 
                 collection.head_image = image_list[0]
@@ -63,6 +82,7 @@ router.route('/')
 
                 await collection.save()
 
+                console.log('this is successful')
                 // test response
                 res.status(201)
                     .send({
@@ -88,21 +108,21 @@ router.route('/:id')
 
             if (collection) {
                 const sku_list = [];
-    
+
                 for (const item of collection.sku_list) {
                     const sku = await Sku.findById(item);
                     sku_list.push(sku);
                 }
-    
+
                 res.status(200)
                     .send({
-                        message : 'The collection was fetched successfully',
-                        data : {collection , skus : sku_list}
+                        message: 'The collection was fetched successfully',
+                        data: { collection, skus: sku_list }
                     })
             } else {
                 res.status(404)
                     .send({
-                        message : 'The collection was not found'
+                        message: 'The collection was not found'
                     })
             }
 
@@ -114,50 +134,75 @@ router.route('/:id')
         }
     })
 
-    .put(auth, admin, 
+    .put(auth, admin,
         upload.array(),
-        async(req, res) => {
-        try {
-            const {params, body, files} = req;
+        async (req, res) => {
+            try {
+                const { params, body, files } = req;
 
-            const collection = await Collections.findById(params.id);
+                const collection = await Collections.findById(params.id);
 
-            if (collection) {
-                for(const [field, value] of Object.entries(body)) {
-                    if (field !== 'positions') collection[field] = value;
-                }
-
-                if (files) {
-                    const image_urls = []
-                    for (const {path} of files) {
-                        cloudinary.v2.uploader.upload(
-                            path,
-                            callback=function(error, response) {
-                                if(error) {
-                                    image_urls.push('error')
-                                } else {
-                                    image_urls.push(response.url)
-                                }
-                            }
-                        )
+                if (collection) {
+                    for (const [field, value] of Object.entries(body)) {
+                        if (field !== 'positions') collection[field] = value;
                     }
 
+                    if (files) {
+                        const image_urls = []
 
+                        const positions = JSON.parse(body.positions);
+
+                        for (const { path } of files) {
+                            cloudinary.v2.uploader.upload(
+                                path,
+                                callback = function (error, response) {
+                                    if (error) {
+                                        image_urls.push('error')
+                                    } else {
+                                        image_urls.push(response.url)
+                                    }
+                                }
+                            )
+                        }
+
+                        for (const position of positions) {
+                            const image_url = image_urls[positions.indexOf(position)]
+                            const [name, pos] = position.split('--')
+                            if (['sub_image_2', 'sub_images_4'].includes(name)) {
+                                collection[name][pos] = image_url
+                            } else collection[name] = image_url
+                        }
+
+                    }
+
+                    await collection.save();
+
+                    const sku_list = [];
+
+                    for (const item of collection.sku_list) {
+                        const sku = await Sku.findById(item);
+                        sku_list.push(sku);
+                    }
+
+                    res.status(200)
+                        .send({
+                            message: 'Successfully updated the collection',
+                            data: { collection, skus: sku_list }
+                        })
+
+                } else {
+                    res.status(404)
+                        .send({
+                            message: 'The collection was not found'
+                        })
                 }
 
-            } else {
-                res.status(404)
+            } catch (e) {
+                res.status(500)
                     .send({
-                        message : 'The collection was not found'
+                        message: e.message
                     })
             }
-            
-        } catch (e) {
-            res.status(500)
-                .send({
-                    message : e.message
-                })
-        }
-    }) 
+        })
 
 module.exports = router

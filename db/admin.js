@@ -93,7 +93,7 @@ const collections = mongoose.Schema({
         type : String,
         required : true
     }, 
-    headline : { // url for the head image
+    headline : { 
         type : String,
         required : true
     },
@@ -111,7 +111,7 @@ const collections = mongoose.Schema({
         type : String
     },
      
-    sub_images_4 : { // the url of the base section image
+    sub_image_4 : { // the url of the base section image (2 in number)
         type : [String]
     },
 
