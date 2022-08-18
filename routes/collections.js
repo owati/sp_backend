@@ -44,7 +44,7 @@ router.route('/')
 
                 const image_list = [];
                 for (let i = 0; i < files.length; i++) {
-                    console.log('runing for filr', path);
+                    // console.log('runing for filr', path);
                     const { path } = files[i]
                     i !== 4 ? await cloudinary.v2.uploader.upload(
                         path,
@@ -60,10 +60,10 @@ router.route('/')
 
                             // }
                         }
-                    ) : cloudinary.v2.uploader.upload("dog.mp4",
+                    ) : await cloudinary.v2.uploader.upload(path,
                         {
                             resource_type: "video",
-                            public_id: "myfolder/videos/dog_closeup",
+                            // public_id: "myfolder/videos/",
                             chunk_size: 6000000,
                             eager: [
                                 { width: 300, height: 300, crop: "pad", audio_codec: "none" },
@@ -71,8 +71,17 @@ router.route('/')
                             eager_async: true,
                             //eager_notification_url: "https://mysite.example.com/notify_endpoint"
                         },
-                        function (error, result) { console.log(result, error) });
+                        function (error, response) { 
+                            console.log('Hi just uploaded the video lest set', error, response)
+                            if (error) {
+                                image_list.push('error')
+                            } else {
+                                image_list.push(response.url)
+                            }
+                        });
                 }
+
+                console.log(image_list);
 
                 collection.head_image = image_list[0]
                 collection.sub_image_2 = [...image_list.slice(1, 4)]
