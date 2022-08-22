@@ -71,7 +71,7 @@ router.route('/')
                             eager_async: true,
                             //eager_notification_url: "https://mysite.example.com/notify_endpoint"
                         },
-                        function (error, response) { 
+                        function (error, response) {
                             console.log('Hi just uploaded the video lest set', error, response)
                             if (error) {
                                 image_list.push('error')
@@ -161,8 +161,12 @@ router.route('/:id')
 
                         const positions = JSON.parse(body.positions);
 
-                        for (const { path } of files) {
-                            cloudinary.v2.uploader.upload(
+                        for (let i = 0; i < files.length; i++) {
+
+                            const { path } = files[i];
+                            const position = positions[i];
+
+                            position !== "sub_video_3" ? cloudinary.v2.uploader.upload(
                                 path,
                                 callback = function (error, response) {
                                     if (error) {
@@ -171,9 +175,26 @@ router.route('/:id')
                                         image_urls.push(response.url)
                                     }
                                 }
-                            )
+                            ) : await cloudinary.v2.uploader.upload(path,
+                                {
+                                    resource_type: "video",
+                                    // public_id: "myfolder/videos/",
+                                    chunk_size: 6000000,
+                                    eager: [
+                                        { width: 300, height: 300, crop: "pad", audio_codec: "none" },
+                                        { width: 160, height: 100, crop: "crop", gravity: "south", audio_codec: "none" }],
+                                    eager_async: true,
+                                    //eager_notification_url: "https://mysite.example.com/notify_endpoint"
+                                },
+                                function (error, response) {
+                                    console.log('Hi just uploaded the video lest set', error, response)
+                                    if (error) {
+                                        image_list.push('error')
+                                    } else {
+                                        image_list.push(response.url)
+                                    }
+                                });
                         }
-
                         for (const position of positions) {
                             const image_url = image_urls[positions.indexOf(position)]
                             const [name, pos] = position.split('--')
@@ -181,37 +202,39 @@ router.route('/:id')
                                 collection[name][pos] = image_url
                             } else collection[name] = image_url
                         }
-
                     }
 
+
                     await collection.save();
-
+    
                     const sku_list = [];
-
+    
                     for (const item of collection.sku_list) {
                         const sku = await Sku.findById(item);
                         sku_list.push(sku);
                     }
-
+    
                     res.status(200)
                         .send({
                             message: 'Successfully updated the collection',
                             data: { collection, skus: sku_list }
                         })
-
-                } else {
-                    res.status(404)
-                        .send({
-                            message: 'The collection was not found'
-                        })
                 }
 
-            } catch (e) {
-                res.status(500)
+
+             else {
+                res.status(404)
                     .send({
-                        message: e.message
+                        message: 'The collection was not found'
                     })
             }
+
+        } catch (e) {
+            res.status(500)
+                .send({
+                    message: e.message
+                })
+        }
         })
 
 module.exports = router
